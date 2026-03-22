@@ -77,15 +77,16 @@ export default function Home() {
     <div className="min-h-screen bg-[#0d0d0d] text-white font-sans selection:bg-[#f15a24] selection:text-white overflow-x-hidden">
       
       {/* 1. BANNER EDGE-TO-EDGE */}
-      <header className="relative w-full h-[30vh] sm:h-[40vh] lg:h-[50vh] min-h-[250px] bg-black">
+      <header className="relative w-full h-[180px] sm:h-[40vh] lg:h-[50vh] bg-black">
         <Image 
           src="/tecnocar-banner.png" 
           alt="Tecnocar Pro" 
           fill
-          className="object-cover object-center opacity-90"
+          // El secreto está aquí: object-contain en móvil, object-cover en PC
+          className="object-contain sm:object-cover object-center opacity-90"
           priority
         />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0d0d0d] to-transparent"></div>
+        <div className="absolute inset-x-0 bottom-0 h-16 sm:h-24 bg-gradient-to-t from-[#0d0d0d] to-transparent pointer-events-none"></div>
       </header>
 
       {/* 2. NAVEGACIÓN */}
