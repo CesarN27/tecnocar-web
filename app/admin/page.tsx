@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "../../lib/firebase"; // Asegúrate de que apunte a tu firebase.ts
-import { Lock, Download, Users, Clock, ShieldCheck, FileSpreadsheet } from "lucide-react";
+import { db } from "../../lib/firebase";
+import { Download, Users, Clock, ShieldCheck, FileSpreadsheet, LogOut } from "lucide-react";
 
-// Definimos cómo se ve un "Lead" (Prospecto) en TypeScript
 interface Lead {
   id: string;
   nombre: string;
@@ -19,41 +19,24 @@ interface Lead {
 }
 
 export default function AdminDashboard() {
-  // Estados para el Login
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState(false);
-
-  // Estados para los Datos
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // La contraseña secreta (Puedes cambiarla aquí)
-  const SECRET_PASSWORD = "Tecnocar2026";
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === SECRET_PASSWORD) {
-      setIsAuthenticated(true);
-      setLoginError(false);
-      fetchLeads(); // Si entra, bajamos los datos de Firebase
-    } else {
-      setLoginError(true);
-    }
-  };
+  // Apenas carga la página, bajamos los datos (ya sabemos que está autorizado gracias al middleware)
+  useEffect(() => {
+    fetchLeads();
+  }, []);
 
   const fetchLeads = async () => {
     setIsLoading(true);
     try {
-      // Hacemos una consulta a Firestore, ordenando por los más recientes primero
       const q = query(collection(db, "registros"), orderBy("fechaRegistro", "desc"));
       const querySnapshot = await getDocs(q);
       
       const leadsData: Lead[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        
-        // Formateamos la fecha de Firebase a algo legible
         let fechaFormateada = "Sin fecha";
         if (data.fechaRegistro && data.fechaRegistro.toDate) {
           fechaFormateada = data.fechaRegistro.toDate().toLocaleDateString('es-MX', {
@@ -77,33 +60,24 @@ export default function AdminDashboard() {
       setLeads(leadsData);
     } catch (error) {
       console.error("Error obteniendo los registros:", error);
-      alert("Hubo un error al descargar los datos de Firebase.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Función estrella: Exportar a CSV (Excel)
+  const handleLogout = () => {
+    // Borramos la cookie de autorización
+    document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    router.push("/login");
+  };
+
   const exportToCSV = () => {
-    // 1. Cabeceras del Excel
     const headers = ["Fecha", "Nombre", "Interés", "Teléfono", "Ubicación", "Edad", "Sexo", "Horario Preferido"];
-    
-    // 2. Mapeamos los datos
     const csvRows = leads.map(lead => [
-      `"${lead.fecha}"`, 
-      `"${lead.nombre}"`, 
-      `"${lead.rama}"`, 
-      `"${lead.telefono}"`, 
-      `"${lead.ubicacion}"`, 
-      lead.edad, 
-      `"${lead.sexo}"`, 
-      `"${lead.horario}"`
-    ].join(",")); // Separados por comas
-
-    // 3. Unimos todo
+      `"${lead.fecha}"`, `"${lead.nombre}"`, `"${lead.rama}"`, `"${lead.telefono}"`, 
+      `"${lead.ubicacion}"`, lead.edad, `"${lead.sexo}"`, `"${lead.horario}"`
+    ].join(","));
     const csvContent = [headers.join(","), ...csvRows].join("\n");
-
-    // 4. Creamos el archivo descargable y forzamos la descarga
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -114,48 +88,11 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
-  // ==========================================
-  // PANTALLA DE LOGIN (Si no está autenticado)
-  // ==========================================
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0d0d0d] flex flex-col items-center justify-center p-4 selection:bg-[#f15a24] selection:text-white">
-        <div className="bg-[#111111] border border-[#222] p-10 rounded-3xl w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-          <div className="bg-[#24130a] w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-[#f15a24]/20">
-            <Lock className="text-[#f15a24]" size={32} />
-          </div>
-          <h1 className="text-2xl font-bold text-white text-center mb-2">Acceso Restringido</h1>
-          <p className="text-gray-400 text-center mb-8 text-sm">Ingresa la contraseña para ver los prospectos.</p>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full bg-[#1a1a1a] border ${loginError ? 'border-red-500' : 'border-[#333] focus:border-[#f15a24]'} text-white rounded-xl px-4 py-3 outline-none transition-colors text-center tracking-widest`}
-                placeholder="••••••••"
-                required
-              />
-              {loginError && <p className="text-red-500 text-xs text-center mt-2 font-medium">Contraseña incorrecta.</p>}
-            </div>
-            <button type="submit" className="w-full bg-[#f15a24] hover:bg-[#d14d1e] text-white px-4 py-3 rounded-xl font-bold transition-all">
-              Entrar al Dashboard
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
-  // PANTALLA DEL DASHBOARD (Si está autenticado)
-  // ==========================================
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-white p-4 md:p-8 font-sans selection:bg-[#f15a24] selection:text-white">
       <div className="max-w-7xl mx-auto">
         
-        {/* HEADER DEL DASHBOARD */}
+        {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 bg-[#111111] border border-[#222] p-6 rounded-3xl shadow-lg">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -165,12 +102,15 @@ export default function AdminDashboard() {
             <p className="text-gray-400 text-sm ml-10">Administración general TECNOCAR PRO</p>
           </div>
           
-          <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex flex-wrap gap-4 w-full md:w-auto">
             <button onClick={fetchLeads} className="bg-[#1a1a1a] border border-[#333] hover:border-gray-500 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-all text-sm flex-1 md:flex-none justify-center">
               <Clock size={18} /> Actualizar
             </button>
-            <button onClick={exportToCSV} disabled={leads.length === 0} className="bg-[#25D366] hover:bg-[#1ebd57] disabled:bg-gray-700 disabled:text-gray-400 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm shadow-[0_0_15px_rgba(37,211,102,0.2)] flex-1 md:flex-none justify-center">
+            <button onClick={exportToCSV} disabled={leads.length === 0} className="bg-[#25D366] hover:bg-[#1ebd57] disabled:bg-gray-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm flex-1 md:flex-none justify-center">
               <FileSpreadsheet size={18} /> Exportar Excel
+            </button>
+            <button onClick={handleLogout} className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all text-sm flex-1 md:flex-none justify-center">
+              <LogOut size={18} /> Salir
             </button>
           </div>
         </header>
