@@ -129,7 +129,7 @@ export default function TallerPage() {
             </div>
             <h3 className="text-2xl font-bold mb-3 text-white">Transmisiones Automáticas</h3>
             <p className="text-gray-400 text-base leading-relaxed">
-              Diagnóstico, reparación y reconstrucción de transmisiones automáticas de todas las marcas.
+              Diagnóstico especializado de transmisiones automáticas de todas las marcas.
             </p>
           </div>
 
@@ -218,7 +218,7 @@ export default function TallerPage() {
             </div>
             <div className="flex items-center gap-4 bg-[#111] p-5 rounded-2xl border border-white/5">
               <CheckCircle2 className="text-[#f15a24] shrink-0" size={24} />
-              <span className="text-gray-300 font-medium">Reconstrucción de transmisiones automáticas</span>
+              <span className="text-gray-300 font-medium">Reparación de transmisiones automáticas</span>
             </div>
           </div>
         </div>

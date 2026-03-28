@@ -151,7 +151,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[#f15a24]/5 blur-[100px] rounded-full w-1/2 left-1/4"></div>
         <div className="relative z-10 max-w-5xl mx-auto px-4 flex flex-col md:flex-row justify-around items-center gap-12 text-center">
           <div className="group">
-            <div className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2 group-hover:scale-110 transition-transform">500+</div>
+            <div className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-2 group-hover:scale-110 transition-transform">300+</div>
             <div className="text-sm text-[#f15a24] font-bold tracking-widest uppercase">Egresados</div>
           </div>
           <div className="group">
@@ -186,9 +186,9 @@ export default function Home() {
             </p>
             <ul className="space-y-3 mb-10 text-sm text-gray-400">
               <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Motores a gasolina y diésel</li>
-              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Sistemas de frenos ABS</li>
-              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Transmisiones automáticas</li>
-              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Suspensión y dirección</li>
+              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Armado y desarmado de motores</li>
+              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Manual de motor completo</li>
+              <li className="flex items-center gap-3"><span className="w-1.5 h-1.5 rounded-full bg-[#f15a24]"></span>Teoria y práctica guiada</li>
             </ul>
           </div>
 
